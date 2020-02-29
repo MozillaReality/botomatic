@@ -1,0 +1,26 @@
+{
+  "name": "botomatic",
+  "version": "0.1.0",
+  "description": "Run a bot in a Hubs room",
+  "main": "index.js",
+  "scripts": {
+    "release": "np && git push"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "MPL",
+  "dependencies": {
+    "chrome-aws-lambda": "^2.0.1",
+    "chrome-launcher": "^0.10.5",
+    "chrome-remote-interface": "^0.27.1"
+  },
+  "devDependencies": {
+    "eslint": "^5.16.0",
+    "eslint-config-prettier": "^4.1.0",
+    "eslint-plugin-prettier": "^3.0.1",
+    "lodash": "^4.17.15",
+    "np": "^5.0.3",
+    "prettier": "^1.16.4",
+    "serverless-offline": "^4.9.4"
+  }
+}

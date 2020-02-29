@@ -1,0 +1,28 @@
+service: botomatic
+
+provider:
+  name: aws
+  runtime: nodejs10.x
+  region: us-west-1
+  stage: public
+  stackName: botomatic-public
+  timeout: 30
+  usagePlan:
+    quota:
+      limit: 1000
+      period: MONTH
+    throttle:
+      rateLimit: 5
+      burstLimit: 10
+
+functions:
+  app:
+    handler: index.handler
+    events:
+      - http:
+          method: get
+          path: run
+          contentHandling: CONVERT_TO_BINARY
+
+plugins:
+  - serverless-offline
