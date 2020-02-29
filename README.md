@@ -1,0 +1,2 @@
+# botomatic
+Hubs Bot lambda
