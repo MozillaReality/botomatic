@@ -162,7 +162,13 @@ module.exports.handler = async function handler(event, context, callback) {
   console.log("handling");
   console.log(JSON.stringify(event));
   const queryStringParameters = event.query || {};
-  const { hub_sid, duration = 30, password, lobby } = queryStringParameters;
+  const {
+    hub_sid,
+    host = "hubs.mozilla.com",
+    duration = 30,
+    password,
+    lobby
+  } = queryStringParameters;
 
   if (password !== "") {
     return callback(null, {
@@ -171,7 +177,7 @@ module.exports.handler = async function handler(event, context, callback) {
     });
   }
 
-  const url = `https://hubs.mozilla.com/${hub_sid}${lobby ? "" : "?bot=true"}`;
+  const url = `https://${host}/${hub_sid}${lobby ? "" : "?bot=true"}`;
 
   try {
     await run(url, duration, !!lobby);
