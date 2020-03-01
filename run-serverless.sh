@@ -29,7 +29,6 @@ DIR=$(pwd)
 pushd $HUBS_OPS_PATH/terraform
 ./grunt_local.sh output botomatic $ENVIRONMENT -json | jq 'with_entries(.value |= .value)' > $DIR/config.json
 popd
-cp serverless.prod.yml serverless.yml
-sls $COMMAND --stage $ENVIRONMENT
 cp serverless.public.yml serverless.yml
+sls $COMMAND --stage $ENVIRONMENT
 rm config.json
