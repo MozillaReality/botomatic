@@ -6,35 +6,6 @@ function sleep(miliseconds = 100) {
   return new Promise(resolve => setTimeout(() => resolve(), miliseconds));
 }
 
-/*async function nodeAppears(client, selector) {
-  // browser code to register and parse mutations
-  const browserCode = selector => {
-    return new Promise(fulfill => {
-      new MutationObserver((mutations, observer) => {
-        // add all the new nodes
-        const nodes = [];
-        mutations.forEach(mutation => {
-          nodes.push(...mutation.addedNodes);
-        });
-        // fulfills if at least one node matches the selector
-        if (nodes.find(node => node.matches(selector))) {
-          observer.disconnect();
-          fulfill();
-        }
-      }).observe(document.body, {
-        childList: true
-      });
-    });
-  };
-  // inject the browser code
-  const { Runtime } = client;
-
-  await Runtime.evaluate({
-    expression: `(${browserCode})(${JSON.stringify(selector)})`,
-    awaitPromise: true
-  });
-}*/
-
 async function run(url, duration, lobby, audio) {
   let data, meta;
   let loaded = false;
@@ -114,45 +85,58 @@ async function run(url, duration, lobby, audio) {
     if (!lobby) {
       const { root } = await DOM.getDocument();
 
-      /*await nodeAppears(client, "#bot-audio-input");
-      console.log("Waiting for Data");
-      await nodeAppears(client, "#bot-data-input");*/
-      await new Promise(res => setTimeout(() => res(), 7500));
-      await Input.dispatchMouseEvent({
-        type: "mousePressed",
-        x: 100,
-        y: 100,
-        button: "left",
-        clickCount: 1
-      });
-      await Input.dispatchMouseEvent({
-        type: "mouseReleased",
-        x: 100,
-        y: 100,
-        button: "left",
-        clickCount: 1
-      });
+      for (let i = 0; i < 60; i++) {
+        try {
+          const { nodeId: dataId } = await DOM.querySelector({
+            nodeId: root.nodeId,
+            selector: "#bot-data-input"
+          });
 
-      const { nodeId: dataId } = await DOM.querySelector({
-        nodeId: root.nodeId,
-        selector: "#bot-data-input"
-      });
+          await DOM.setFileInputFiles({
+            nodeId: dataId,
+            files: [`${process.env.LAMBDA_TASK_ROOT}/bot-recording.json`]
+          });
 
-      await DOM.setFileInputFiles({
-        nodeId: dataId,
-        files: [`${process.env.LAMBDA_TASK_ROOT}/bot-recording.json`]
-      });
+          break;
+        } catch (e) {
+          console.log("No data node yet.");
+          await new Promise(res => setTimeout(() => res(), 500));
+        }
+      }
 
       if (audio) {
-        const { nodeId: audioId } = await DOM.querySelector({
-          nodeId: root.nodeId,
-          selector: "#bot-audio-input"
+        await Input.dispatchMouseEvent({
+          type: "mousePressed",
+          x: 100,
+          y: 100,
+          button: "left",
+          clickCount: 1
+        });
+        await Input.dispatchMouseEvent({
+          type: "mouseReleased",
+          x: 100,
+          y: 100,
+          button: "left",
+          clickCount: 1
         });
 
-        await DOM.setFileInputFiles({
-          nodeId: audioId,
-          files: [`${process.env.LAMBDA_TASK_ROOT}/bot-recording.mp3`]
-        });
+        for (let i = 0; i < 60; i++) {
+          try {
+            const { nodeId: audioId } = await DOM.querySelector({
+              nodeId: root.nodeId,
+              selector: "#bot-audio-input"
+            });
+
+            await DOM.setFileInputFiles({
+              nodeId: audioId,
+              files: [`${process.env.LAMBDA_TASK_ROOT}/bot-recording.mp3`]
+            });
+            break;
+          } catch (e) {
+            console.log("No audio node yet.");
+            await new Promise(res => setTimeout(() => res(), 500));
+          }
+        }
       }
     }
     await new Promise(res => setTimeout(() => res(), duration * 1000));
