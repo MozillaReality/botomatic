@@ -6,7 +6,7 @@ function sleep(miliseconds = 100) {
   return new Promise(resolve => setTimeout(() => resolve(), miliseconds));
 }
 
-async function nodeAppears(client, selector) {
+/*async function nodeAppears(client, selector) {
   // browser code to register and parse mutations
   const browserCode = selector => {
     return new Promise(fulfill => {
@@ -33,9 +33,9 @@ async function nodeAppears(client, selector) {
     expression: `(${browserCode})(${JSON.stringify(selector)})`,
     awaitPromise: true
   });
-}
+}*/
 
-async function run(url, duration, lobby) {
+async function run(url, duration, lobby, audio) {
   let data, meta;
   let loaded = false;
 
@@ -67,7 +67,7 @@ async function run(url, duration, lobby) {
     }
   }
 
-  const { DOM, Network, Page, Runtime, Emulation } = client;
+  const { DOM, Network, Page, Runtime, Emulation, Input } = client;
   Runtime.consoleAPICalled(entry => {
     console.log(
       "console api called: " + entry.args.map(arg => arg.value).join(" ")
@@ -112,28 +112,27 @@ async function run(url, duration, lobby) {
     });
 
     if (!lobby) {
-      console.log("Waiting for DOM");
       const { root } = await DOM.getDocument();
-      console.log("Waiting for Audio");
 
       /*await nodeAppears(client, "#bot-audio-input");
       console.log("Waiting for Data");
       await nodeAppears(client, "#bot-data-input");*/
-      console.log("Inputs ready");
       await new Promise(res => setTimeout(() => res(), 7500));
-      console.log("Set audio");
-      const { nodeId: audioId } = await DOM.querySelector({
-        nodeId: root.nodeId,
-        selector: "#bot-audio-input"
+      await Input.dispatchMouseEvent({
+        type: "mousePressed",
+        x: 100,
+        y: 100,
+        button: "left",
+        clickCount: 1
+      });
+      await Input.dispatchMouseEvent({
+        type: "mouseReleased",
+        x: 100,
+        y: 100,
+        button: "left",
+        clickCount: 1
       });
 
-      await DOM.setFileInputFiles({
-        nodeId: audioId,
-        files: [`${process.env.LAMBDA_TASK_ROOT}/bot-recording.mp3`]
-      });
-
-      console.log("Set data");
-      console.log(audioId);
       const { nodeId: dataId } = await DOM.querySelector({
         nodeId: root.nodeId,
         selector: "#bot-data-input"
@@ -144,8 +143,17 @@ async function run(url, duration, lobby) {
         files: [`${process.env.LAMBDA_TASK_ROOT}/bot-recording.json`]
       });
 
-      console.log("Wait");
-      console.log(dataId);
+      if (audio) {
+        const { nodeId: audioId } = await DOM.querySelector({
+          nodeId: root.nodeId,
+          selector: "#bot-audio-input"
+        });
+
+        await DOM.setFileInputFiles({
+          nodeId: audioId,
+          files: [`${process.env.LAMBDA_TASK_ROOT}/bot-recording.mp3`]
+        });
+      }
     }
     await new Promise(res => setTimeout(() => res(), duration * 1000));
   } catch (error) {
@@ -167,7 +175,8 @@ module.exports.handler = async function handler(event, context, callback) {
     host = "hubs.mozilla.com",
     duration = 30,
     password,
-    lobby
+    lobby,
+    audio
   } = queryStringParameters;
 
   if (password !== "") {
@@ -180,7 +189,7 @@ module.exports.handler = async function handler(event, context, callback) {
   const url = `https://${host}/${hub_sid}${lobby ? "" : "?bot=true"}`;
 
   try {
-    await run(url, duration, !!lobby);
+    await run(url, duration, !!lobby, !!audio);
   } catch (error) {
     console.error("Error running", url, error);
     return callback(error);
