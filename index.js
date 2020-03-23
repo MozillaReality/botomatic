@@ -6,7 +6,7 @@ function sleep(miliseconds = 100) {
   return new Promise(resolve => setTimeout(() => resolve(), miliseconds));
 }
 
-async function run(url, duration, lobby, audio) {
+async function run(url, duration, lobby, audio, slow) {
   let data, meta;
   let loaded = false;
 
@@ -52,6 +52,15 @@ async function run(url, duration, lobby, audio) {
       DOM.enable(),
       Runtime.enable()
     ]);
+
+    if (slow) {
+      await Network.emulateNetworkConditions({
+        offline: false,
+        latency: 500,
+        downloadThroughput: 100000,
+        uploadThroughput: 50000
+      });
+    }
 
     await Emulation.setDeviceMetricsOverride({
       mobile: false,
@@ -160,7 +169,8 @@ module.exports.handler = async function handler(event, context, callback) {
     duration = 30,
     password,
     lobby,
-    audio
+    audio,
+    slow
   } = queryStringParameters;
 
   if (password !== "") {
@@ -173,7 +183,7 @@ module.exports.handler = async function handler(event, context, callback) {
   const url = `https://${host}/${hub_sid}${lobby ? "" : "?bot=true"}`;
 
   try {
-    await run(url, duration, !!lobby, !!audio);
+    await run(url, duration, !!lobby, !!audio, !!slow);
   } catch (error) {
     console.error("Error running", url, error);
     return callback(error);
