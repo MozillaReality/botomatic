@@ -165,7 +165,7 @@ module.exports.handler = async function handler(event, context, callback) {
   const queryStringParameters = event.query || {};
   const {
     hub_sid,
-    host = "hubs.mozilla.com",
+    host,
     duration = 30,
     password,
     lobby,
