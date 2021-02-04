@@ -173,7 +173,7 @@ module.exports.handler = async function handler(event, context, callback) {
     slow
   } = queryStringParameters;
 
-  if (password !== "") {
+  if (password !== "YOUR_PASS_HERE") {
     return callback(null, {
       statusCode: 200,
       body: "bad password"
