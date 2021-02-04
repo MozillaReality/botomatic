@@ -26,7 +26,7 @@ Information on configuring your local environment for Serverless can be found he
 ## Using the Lambda Function
 
 Example Run:
-`curl -X GET "https://<lambda_endpoint_url>/public/run?host=<hubs_instance_url>&hub_sid=<room_id>&password=<YOUR_PASS>&duration=30"`
+`curl "https://<lambda_endpoint_url>/public/run?host=<hubs_instance_url>&hub_sid=<room_id>&password=<YOUR_PASS>&duration=30"`
 
 There are a number of parameters that you can define in your request. example: `&audio=true`
 
