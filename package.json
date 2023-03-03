@@ -11,7 +11,7 @@
   "license": "MPL",
   "dependencies": {
     "chrome-aws-lambda": "^2.0.1",
-    "chrome-launcher": "^0.10.5",
+    "chrome-launcher": "^0.15.1",
     "chrome-remote-interface": "^0.27.1"
   },
   "devDependencies": {
